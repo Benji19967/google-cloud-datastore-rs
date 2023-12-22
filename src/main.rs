@@ -40,13 +40,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             partition_id: {
                 Some(PartitionId {
                     database_id: "".into(),
-                    // TODO: Add namespace_id and project
-                    namespace_id: "default".into(),
+                    namespace_id: "".into(),
                     project_id: bxdx_project_id.clone(),
                 })
             },
             path: vec![PathElement {
-                kind: "Source".into(),
+                kind: "source".into(),
                 id_type: Some(IdType::Id(5634161670881280)),
             }],
         }]
