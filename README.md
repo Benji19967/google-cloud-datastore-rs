@@ -62,3 +62,7 @@ git submodule update --remote
 ### Datastore Client Example using gRPC
 
 - https://github.com/i110/google-cloud-rs/blob/c826356348972c859886f9b439d183a50dcf9047/google-cloud/src/datastore/client.rs
+
+### TLS and SSL certs
+
+- https://jessitron.com/2022/11/02/make-https-work-on-grpc-in-rust-load-a-root-certificate-into-the-tls-config/

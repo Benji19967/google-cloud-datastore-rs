@@ -1,0 +1,4 @@
+[gcp]
+scope = "https://www.googleapis.com/auth/cloud-platform"
+domain_name =  "datastore.googleapis.com"
+endpoint = "https://datastore.googleapis.com" 

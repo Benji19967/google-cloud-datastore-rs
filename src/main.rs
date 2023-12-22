@@ -18,6 +18,10 @@ use tonic::metadata::MetadataValue;
 use tonic::transport::{Certificate, Channel, ClientTlsConfig};
 use tonic::IntoRequest;
 
+mod settings;
+
+use settings::SETTINGS;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let mut client = GreeterClient::connect("http://[::1]:50051").await?;
@@ -25,8 +29,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bxdx_project_id = env::var("BXDX_PROJECT_ID").expect("$BXDX_PROJECT_ID is not set");
 
     let authentication_manager = AuthenticationManager::new().await?;
-    let scopes = &["https://www.googleapis.com/auth/cloud-platform"];
-    let token = authentication_manager.get_token(scopes).await?;
+    let token = authentication_manager
+        .get_token(&[SETTINGS.gcp.scope.as_str()])
+        .await?;
 
     let request = tonic::Request::new(LookupRequest {
         database_id: "".into(),
@@ -56,14 +61,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let file = File::open(path)?;
     // let creds = serde_json::from_reader(file)?;
 
-    const DOMAIN_NAME: &'static str = "datastore.googleapis.com";
-    const ENDPOINT: &'static str = "https://datastore.googleapis.com";
     const TLS_CERTS: &[u8] = include_bytes!("/etc/ssl/cert.pem");
-    // let TOKEN: &'static str = token.clone().as_str();
     let tls_config = ClientTlsConfig::new()
         .ca_certificate(Certificate::from_pem(TLS_CERTS))
-        .domain_name(DOMAIN_NAME);
-    let channel = Channel::from_static(ENDPOINT)
+        .domain_name(&SETTINGS.gcp.domain_name);
+    let channel = Channel::from_static(&SETTINGS.gcp.endpoint)
         .tls_config(tls_config)?
         .connect()
         .await?;
