@@ -1,6 +1,7 @@
 pub mod api {
     tonic::include_proto!("google.datastore.v1");
 }
+
 use api::datastore_client::DatastoreClient;
 use api::key::path_element::IdType;
 use api::key::PathElement;
@@ -11,9 +12,6 @@ use api::LookupRequest;
 use api::PartitionId;
 use api::ReadOptions;
 use gcp_auth::AuthenticationManager;
-use std::env;
-use std::fs::File;
-use tonic::metadata::AsciiMetadataValue;
 use tonic::metadata::MetadataValue;
 use tonic::transport::{Certificate, Channel, ClientTlsConfig};
 use tonic::IntoRequest;
@@ -24,9 +22,8 @@ use settings::SETTINGS;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // let mut client = GreeterClient::connect("http://[::1]:50051").await?;
-
-    let bxdx_project_id = env::var("BXDX_PROJECT_ID").expect("$BXDX_PROJECT_ID is not set");
+    // let bxdx_gcp_project_id = env::var("BXDX_PROJECT_ID").expect("$BXDX_PROJECT_ID is not set");
+    let bxdx_gcp_project_id = &SETTINGS.gcp_project_id;
 
     let authentication_manager = AuthenticationManager::new().await?;
     let token = authentication_manager
@@ -35,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let request = tonic::Request::new(LookupRequest {
         database_id: "".into(),
-        project_id: bxdx_project_id.clone(),
+        project_id: bxdx_gcp_project_id.clone(),
         read_options: Some(ReadOptions {
             consistency_type: Some(ConsistencyType::ReadConsistency(
                 ReadConsistency::Strong.into(),
@@ -46,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Some(PartitionId {
                     database_id: "".into(),
                     namespace_id: "".into(),
-                    project_id: bxdx_project_id.clone(),
+                    project_id: bxdx_gcp_project_id.clone(),
                 })
             },
             path: vec![PathElement {
@@ -56,10 +53,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }]
         .into(),
     });
-
-    // let path = env::var("GOOGLE_APPLICATION_CREDENTIALS")?;
-    // let file = File::open(path)?;
-    // let creds = serde_json::from_reader(file)?;
 
     const TLS_CERTS: &[u8] = include_bytes!("/etc/ssl/cert.pem");
     let tls_config = ClientTlsConfig::new()
