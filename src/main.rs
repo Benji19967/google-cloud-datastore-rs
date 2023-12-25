@@ -62,10 +62,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut request = request.into_request();
     let metadata = request.metadata_mut();
 
-    // Adding Bearer worked: seems like the gRPC metadata for the request is similar to HTTP headers.
     let token = AuthManager::new().await?.get_token().await?;
+    // Adding Bearer worked: seems like the gRPC metadata for the request is similar to HTTP headers.
     let tokenfinal: MetadataValue<_> = format!("Bearer {}", token.as_str()).parse().unwrap();
-    println!("{:?}", tokenfinal.to_str());
     metadata.insert("authorization", tokenfinal);
     let response = client.lookup(request).await.unwrap();
     let response_message = response.into_inner();
