@@ -11,24 +11,20 @@ use api::Key;
 use api::LookupRequest;
 use api::PartitionId;
 use api::ReadOptions;
-use gcp_auth::AuthenticationManager;
 use tonic::metadata::MetadataValue;
 use tonic::transport::{Certificate, Channel, ClientTlsConfig};
 use tonic::IntoRequest;
 
+mod auth;
 mod settings;
 
+use auth::AuthManager;
 use settings::SETTINGS;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let bxdx_gcp_project_id = env::var("BXDX_PROJECT_ID").expect("$BXDX_PROJECT_ID is not set");
     let bxdx_gcp_project_id = &SETTINGS.gcp_project_id;
-
-    let authentication_manager = AuthenticationManager::new().await?;
-    let token = authentication_manager
-        .get_token(&[SETTINGS.gcp.scope.as_str()])
-        .await?;
 
     let request = tonic::Request::new(LookupRequest {
         database_id: "".into(),
@@ -67,6 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let metadata = request.metadata_mut();
 
     // Adding Bearer worked: seems like the gRPC metadata for the request is similar to HTTP headers.
+    let token = AuthManager::new().await?.get_token().await?;
     let tokenfinal: MetadataValue<_> = format!("Bearer {}", token.as_str()).parse().unwrap();
     println!("{:?}", tokenfinal.to_str());
     metadata.insert("authorization", tokenfinal);
