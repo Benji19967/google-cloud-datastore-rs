@@ -16,6 +16,7 @@ use tonic::transport::{Certificate, Channel, ClientTlsConfig};
 use tonic::IntoRequest;
 
 mod auth;
+mod datastore;
 mod settings;
 
 use auth::AuthManager;

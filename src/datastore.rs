@@ -1,7 +1,12 @@
+pub mod api {
+    tonic::include_proto!("google.datastore.v1");
+}
 use api::datastore_client::DatastoreClient;
+use std::collections::HashMap;
+use tonic::transport::Channel;
 
 pub struct DSutils {
-    client: DatastoreClient,
+    clients: HashMap<String, DatastoreClient<Channel>>, // one client per GCP project
 }
 
 impl DSutils {
